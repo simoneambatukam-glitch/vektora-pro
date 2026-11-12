@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230a0a0e' stroke='%23c9a86a' stroke-width='2'/%3E%3Ctext x='32' y='44' font-family='Georgia,serif' font-size='34' fill='%23ecd9a4' text-anchor='middle'%3EV%3C/text%3E%3C/svg%3E">
-<title>Vektora Pro — PNG/JPG ke SVG</title>
+<title>Vektora Pro v2 — PNG/JPG ke SVG</title>
 <style>
-/* ================= Vektora Pro — Dark Luxury ================= */
+/* ================= Vektora Pro v2 — Dark Luxury ================= */
 :root{
   --bg:#0a0a0e; --bg2:#101016;
   --card:rgba(20,20,28,.72);
@@ -40,6 +40,7 @@ h1{font-family:var(--serif); font-weight:400; font-size:clamp(30px,5.4vw,46px); 
 h1 em{font-style:italic; color:var(--gold-hi)}
 .rule{width:64px; height:1px; background:linear-gradient(90deg, transparent, var(--gold), transparent); margin:16px auto 10px}
 .sub{color:var(--mut); font-size:13.5px; letter-spacing:.04em; margin:0 0 22px}
+.badge{display:inline-block; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold-hi); border:1px solid var(--gold-dim); border-radius:99px; padding:4px 12px; margin-top:10px}
 /* ---- layout ---- */
 .grid{display:grid; grid-template-columns:300px 1fr; gap:18px; align-items:start}
 @media(max-width:820px){.grid{grid-template-columns:1fr}}
@@ -60,6 +61,19 @@ h1 em{font-style:italic; color:var(--gold-hi)}
 #drop.over{border-color:var(--gold-hi); background:rgba(201,168,106,.12); transform:scale(1.015); box-shadow:0 0 0 4px rgba(201,168,106,.12), 0 0 32px rgba(201,168,106,.18)}
 #drop .ic{font-size:26px; display:block; margin-bottom:6px; color:var(--gold)}
 #drop small{letter-spacing:.18em; text-transform:uppercase; font-size:10.5px}
+/* ---- preset chips (sync ke select#pre yang disembunyikan) ---- */
+.chips{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:4px}
+.chip{
+  padding:10px 6px; border-radius:12px; border:1px solid var(--bd-soft);
+  background:var(--bg2); color:var(--mut); font-size:12px; line-height:1.35;
+  cursor:pointer; text-align:center; transition:border-color .2s, background .2s, color .2s, transform .15s;
+}
+.chip b{display:block; font-size:13px; color:var(--tx); font-weight:600}
+.chip:hover{border-color:var(--gold-dim); color:var(--tx)}
+.chip.on{border-color:var(--gold); background:rgba(201,168,106,.14); color:var(--gold-hi); box-shadow:0 0 0 3px rgba(201,168,106,.10)}
+.chip.on b{color:var(--gold-hi)}
+.chip:active{transform:scale(.97)}
+#pre{display:none}
 /* ---- controls ---- */
 label{display:block; margin:16px 0 6px; color:var(--mut); font-size:12px; letter-spacing:.08em; text-transform:uppercase}
 label b{color:var(--gold-hi); font-weight:600; font-size:13px; letter-spacing:0}
@@ -171,30 +185,40 @@ footer b{color:var(--gold); font-weight:600}
     <h1>Vektora <em>Pro</em></h1>
     <div class="rule"></div>
     <p class="sub">PNG / JPG ke SVG &mdash; di-trace di browser, tanpa server.</p>
+    <span class="badge">v2 &middot; Marching Squares &middot; Catmull-Rom</span>
   </header>
 
   <div class="grid">
     <div class="card rise d1">
       <h2>Atur &amp; Vectorize</h2>
-      <p class="hint">Pilih gambar, atur gaya, lalu vectorize.</p>
+      <p class="hint">Pilih gambar, pilih preset, lalu vectorize.</p>
 
       <div id="drop"><span class="ic">&#11014;</span>Klik, drag, atau paste gambar<br><small>PNG &middot; JPG &middot; WEBP</small></div>
       <input type="file" id="file" accept="image/*" hidden>
 
+      <label>Preset</label>
+      <div class="chips" id="prechips">
+        <button type="button" class="chip" data-pre="logo"><b>Logo</b>ikon · tajam</button>
+        <button type="button" class="chip on" data-pre="seimbang"><b>Seimbang</b>standar</button>
+        <button type="button" class="chip" data-pre="ilustrasi"><b>Ilustrasi</b>halus</button>
+      </div>
+      <select id="pre">
+        <option value="logo">Logo / ikon (tajam)</option>
+        <option value="seimbang" selected>Seimbang</option>
+        <option value="ilustrasi">Ilustrasi (halus)</option>
+      </select>
+
       <label>Jumlah warna: <b id="kv">12</b></label>
       <input type="range" id="k" min="2" max="32" value="12">
 
-      <label>Detail (simplify): <b id="sv">0.6</b></label>
-      <input type="range" id="s" min="0.1" max="3" step="0.1" value="0.6">
+      <label>Detail / simplify (px output): <b id="sv">1.2</b></label>
+      <input type="range" id="s" min="0.2" max="6" step="0.1" value="1.2">
 
-      <label>Smoothing kurva</label>
-      <select id="sm"><option value="1">Halus (bezier)</option><option value="0">Tajam (polygon)</option></select>
-
-      <label>Buang noise kecil (px2): <b id="nv">8</b></label>
-      <input type="range" id="n" min="0" max="200" value="8">
+      <label>Buang area kecil (px2 output): <b id="nv">6</b></label>
+      <input type="range" id="n" min="0" max="200" value="6">
 
       <label>Resolusi proses</label>
-      <select id="res"><option>512</option><option selected>1024</option><option>2048</option></select>
+      <select id="res"><option value="512">512</option><option value="1024" selected>1024</option><option value="2048">2048 (lambat)</option></select>
 
       <button class="primary" id="go" disabled>Vectorize</button>
       <button id="dl" disabled>Download SVG</button>
@@ -217,12 +241,18 @@ footer b{color:var(--gold); font-weight:600}
     </div>
   </div>
 
-  <footer class="rise d3">Ditenagai mesin trace <b>Vektora</b> &middot; k-means &amp; boundary tracing &middot; semua proses di perangkatmu</footer>
+  <footer class="rise d3">Ditenagai mesin trace <b>Vektora v2</b> &middot; marching squares &amp; Catmull-Rom &middot; semua proses di perangkatmu</footer>
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
 let img = null, busy = false;
+
+const PRESETS = {
+  logo:     { sigma: 0.7, curve: 'sharp',  stroke: 0.3 },
+  seimbang: { sigma: 1.0, curve: 'smooth', stroke: 0.5 },
+  ilustrasi:{ sigma: 1.5, curve: 'smooth', stroke: 0.5 }
+};
 
 // ---------- input ----------
 const drop = $('drop'), file = $('file');
@@ -267,10 +297,12 @@ $('go').onclick = () => {
 
 function run() {
   const t0 = performance.now();
-  const maxW = +$('res').value;
-  const sc = Math.min(1, maxW / Math.max(img.width, img.height));
+  const preset = PRESETS[$('pre').value];
+  const procMax = +$('res').value;
+  const sc = Math.min(1, procMax / Math.max(img.width, img.height));
   const w = Math.max(1, Math.round(img.width * sc));
   const h = Math.max(1, Math.round(img.height * sc));
+  const f = 1 / sc; // proses -> output
 
   const cv = document.createElement('canvas');
   cv.width = w; cv.height = h;
@@ -279,17 +311,16 @@ function run() {
   cx.drawImage(img, 0, 0, w, h);
   const px = cx.getImageData(0, 0, w, h).data;
 
-  // pixel opaque saja yang diproses (transparan = background = tetap transparan)
   const idx = [];
   for (let i = 0; i < w * h; i++) if (px[i * 4 + 3] >= 128) idx.push(i);
   if (!idx.length) throw new Error('gambar kosong / transparan semua');
 
   const K = Math.min(+$('k').value, idx.length);
-  const { lab, cent } = kmeans(px, idx, K);
+  let { lab, cent } = kmeans(px, idx, K);
+  lab = majority(lab, w, h, idx);            // buang bintik pixel
 
-  const eps = +$('s').value;
-  const minA = +$('n').value;
-  const smooth_ = $('sm').value === '1';
+  const eps = +$('s').value;                 // detail dalam px output
+  const minA = +$('n').value;                // luas minimum dalam px2 output
 
   const cnt = new Array(K).fill(0);
   for (const i of idx) cnt[lab[i]]++;
@@ -297,23 +328,25 @@ function run() {
   const layers = [];
   for (let k = 0; k < K; k++) {
     if (!cnt[k]) continue;
-    const loops = traceLoops(lab, k, w, h);
+    const field = softField(lab, k, w, h, preset.sigma);  // W,H = w+2,h+2
+    const loops = contour(field, w + 2, h + 2, 0.5);
     let d = '';
     for (const L of loops) {
-      if (Math.abs(area(L)) < minA) continue;
-      const base = smooth_ ? chaikin(L, 2) : L;
-      const s = simplify(base, eps);
-      if (s.length < 3) continue;
-      d += smooth_ ? bezPath(s, 1 / sc) : polyPath(s, 1 / sc);
+      // koordinat pixel -> output, dengan offset pusat pixel
+      const P = L.map(p => [(p[0] + 0.5) * f, (p[1] + 0.5) * f]);
+      if (Math.abs(area(P)) < minA) continue;
+      const S = simplify(P, eps);
+      if (S.length < 3) continue;
+      d += preset.curve === 'smooth' ? catmullPath(S) : polyPath(S);
     }
     if (d) layers.push({ c: cent[k], d, n: cnt[k] });
   }
 
-  // gambar layer terbesar dulu, layer kecil di atas
-  layers.sort((a, b) => b.n - a.n);
+  layers.sort((a, b) => b.n - a.n); // area besar di bawah, detail kecil di atas
   const body = layers.map(g => {
     const hx = hex(g.c);
-    return `<path fill="${hx}" stroke="${hx}" stroke-width="0.4" fill-rule="evenodd" d="${g.d}"/>`;
+    const stroke = preset.stroke > 0 ? ` stroke="${hx}" stroke-width="${preset.stroke}"` : '';
+    return `<path fill="${hx}"${stroke} fill-rule="evenodd" d="${g.d}"/>`;
   }).join('\n');
 
   const svgText = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${img.width} ${img.height}" width="${img.width}" height="${img.height}">\n${body}\n</svg>`;
@@ -326,7 +359,7 @@ function run() {
   $('stat').textContent = `${layers.length} layer · ${K} warna · ${(svgText.length / 1024).toFixed(1)} KB · ${Math.round(performance.now() - t0)} ms`;
 }
 
-// ---------- color quantization (k-means, dengan sampling) ----------
+// ---------- kuantisasi warna (k-means + sampling) ----------
 function kmeans(px, idx, K) {
   const n = idx.length;
   const lab = new Int16Array(px.length / 4).fill(-1);
@@ -337,7 +370,6 @@ function kmeans(px, idx, K) {
   const col = i => [px[i * 4], px[i * 4 + 1], px[i * 4 + 2]];
   const dist = (a, b) => { const dr = a[0] - b[0], dg = a[1] - b[1], db = a[2] - b[2]; return dr * dr + dg * dg + db * db; };
 
-  // init: farthest-point (deterministik)
   const C = [samp[Math.floor(samp.length / 2)]];
   const d = new Float64Array(samp.length).fill(Infinity);
   while (C.length < K) {
@@ -372,7 +404,6 @@ function kmeans(px, idx, K) {
     if (moved < 1) break;
   }
 
-  // assign semua pixel ke centroid terdekat
   for (const i of idx) {
     const c = col(i);
     let best = 0, bd = Infinity;
@@ -382,42 +413,133 @@ function kmeans(px, idx, K) {
   return { lab, cent };
 }
 
-// ---------- boundary tracing (pixel-akurat, handle lubang otomatis) ----------
-function traceLoops(lab, k, w, h) {
-  const m = (x, y) => x >= 0 && y >= 0 && x < w && y < h && lab[y * w + x] === k;
-  const VW = w + 1;
-  const key = (x, y) => y * VW + x;
-  const from = new Map();
-  const E = [];
-  const add = (x1, y1, x2, y2) => {
-    const e = { x1, y1, x2, y2, used: false };
-    E.push(e);
-    const kk = key(x1, y1);
-    let a = from.get(kk);
-    if (!a) { a = []; from.set(kk, a); }
-    a.push(e);
-  };
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    if (!m(x, y)) continue;
-    if (!m(x, y - 1)) add(x, y, x + 1, y);
-    if (!m(x + 1, y)) add(x + 1, y, x + 1, y + 1);
-    if (!m(x, y + 1)) add(x + 1, y + 1, x, y + 1);
-    if (!m(x - 1, y)) add(x, y + 1, x, y);
-  }
-  const loops = [];
-  for (const e0 of E) {
-    if (e0.used) continue;
-    const L = [];
-    let e = e0;
-    while (e && !e.used) {
-      e.used = true;
-      L.push([e.x1, e.y1]);
-      const a = from.get(key(e.x2, e.y2));
-      let nx = null;
-      if (a) for (const c of a) if (!c.used) { nx = c; break; }
-      e = nx;
+// mode filter 3x3: hilangkan pixel terisolasi yang salah warna
+function majority(lab, w, h, idx) {
+  const out = new Int16Array(lab);
+  const cnt = new Uint16Array(64);
+  for (const i of idx) {
+    const x = i % w, y = (i - x) / w;
+    if (x === 0 || y === 0 || x === w - 1 || y === h - 1) continue;
+    cnt.fill(0);
+    let best = lab[i], bc = 0;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const l = lab[(y + dy) * w + x + dx];
+      if (l < 0) continue;
+      cnt[l]++;
+      if (cnt[l] > bc) { bc = cnt[l]; best = l; }
     }
-    if (L.length > 2) loops.push(L);
+    out[i] = best;
+  }
+  return out;
+}
+
+// ---------- mask halus per warna (indikator + gaussian blur) ----------
+function softField(lab, k, w, h, sigma) {
+  const W = w + 2, H = h + 2;
+  let a = new Float32Array(W * H);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++)
+    if (lab[y * w + x] === k) a[(y + 1) * W + x + 1] = 1;
+  return sigma > 0 ? gblur(a, W, H, sigma) : a;
+}
+
+function gblur(src, W, H, s) {
+  const r = Math.ceil(s * 3);
+  const ker = []; let sum = 0;
+  for (let i = -r; i <= r; i++) { const v = Math.exp(-i * i / (2 * s * s)); ker.push(v); sum += v; }
+  for (let i = 0; i < ker.length; i++) ker[i] /= sum;
+  const tmp = new Float32Array(W * H), out = new Float32Array(W * H);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    let acc = 0;
+    for (let j = -r; j <= r; j++) { const xx = x + j; if (xx >= 0 && xx < W) acc += src[y * W + xx] * ker[j + r]; }
+    tmp[y * W + x] = acc;
+  }
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    let acc = 0;
+    for (let j = -r; j <= r; j++) { const yy = y + j; if (yy >= 0 && yy < H) acc += tmp[yy * W + x] * ker[j + r]; }
+    out[y * W + x] = acc;
+  }
+  return out;
+}
+
+// ---------- marching squares: kontur sub-pixel pada iso-level ----------
+// hasil dalam koordinat indeks field, dikurangi 1 agar kembali ke koordinat pixel asli
+const EDGE_PAIRS = {
+  1: [[3, 2]], 2: [[2, 1]], 3: [[3, 1]], 4: [[0, 1]], 6: [[0, 2]], 7: [[0, 3]],
+  8: [[0, 3]], 9: [[0, 2]], 11: [[0, 1]], 12: [[3, 1]], 13: [[2, 1]], 14: [[3, 2]]
+};
+
+function contour(F, W, H, iso) {
+  const adj = new Map(), pos = new Map();
+  const idH = (x, y) => 2 * (y * W + x);
+  const idV = (x, y) => 2 * (y * W + x) + 1;
+
+  // tiap edge = [id, x, y] dengan posisi hasil interpolasi
+  const edge = (e, x, y) => {
+    let a, b, id, px, py;
+    if (e === 0) { // atas: (x,y)-(x+1,y)
+      a = F[y * W + x]; b = F[y * W + x + 1]; const t = (iso - a) / ((b - a) || 1e-9);
+      id = idH(x, y); px = x + t; py = y;
+    } else if (e === 1) { // kanan: (x+1,y)-(x+1,y+1)
+      a = F[y * W + x + 1]; b = F[(y + 1) * W + x + 1]; const t = (iso - a) / ((b - a) || 1e-9);
+      id = idV(x + 1, y); px = x + 1; py = y + t;
+    } else if (e === 2) { // bawah: (x,y+1)-(x+1,y+1)
+      a = F[(y + 1) * W + x]; b = F[(y + 1) * W + x + 1]; const t = (iso - a) / ((b - a) || 1e-9);
+      id = idH(x, y + 1); px = x + t; py = y + 1;
+    } else { // kiri: (x,y)-(x,y+1)
+      a = F[y * W + x]; b = F[(y + 1) * W + x]; const t = (iso - a) / ((b - a) || 1e-9);
+      id = idV(x, y); px = x; py = y + t;
+    }
+    pos.set(id, [px, py]);
+    return id;
+  };
+
+  const link = (p, q) => {
+    if (!adj.has(p)) adj.set(p, []);
+    if (!adj.has(q)) adj.set(q, []);
+    adj.get(p).push(q);
+    adj.get(q).push(p);
+  };
+
+  for (let y = 0; y < H - 1; y++) for (let x = 0; x < W - 1; x++) {
+    const tl = F[y * W + x] >= iso ? 8 : 0;
+    const tr = F[y * W + x + 1] >= iso ? 4 : 0;
+    const br = F[(y + 1) * W + x + 1] >= iso ? 2 : 0;
+    const bl = F[(y + 1) * W + x] >= iso ? 1 : 0;
+    const c = tl | tr | br | bl;
+    if (c === 0 || c === 15) continue;
+
+    let pairs;
+    if (c === 5 || c === 10) {
+      const center = (F[y * W + x] + F[y * W + x + 1] + F[(y + 1) * W + x] + F[(y + 1) * W + x + 1]) / 4;
+      const hi = center >= iso;
+      if (c === 5) pairs = hi ? [[3, 0], [2, 1]] : [[0, 1], [3, 2]];
+      else pairs = hi ? [[0, 1], [3, 2]] : [[3, 0], [2, 1]];
+    } else {
+      pairs = EDGE_PAIRS[c];
+    }
+    for (const [e1, e2] of pairs) {
+      const p = edge(e1, x, y), q = edge(e2, x, y);
+      link(p, q);
+    }
+  }
+
+  // sambung segmen menjadi loop tertutup
+  const visited = new Set();
+  const loops = [];
+  for (const start of adj.keys()) {
+    if (visited.has(start)) continue;
+    const loop = [];
+    let prev = -1, cur = start;
+    while (!visited.has(cur)) {
+      visited.add(cur);
+      const p = pos.get(cur);
+      loop.push([p[0] - 1, p[1] - 1]);
+      const nb = adj.get(cur);
+      if (!nb || nb.length < 2) break;
+      const nxt = nb[0] !== prev ? nb[0] : nb[1];
+      prev = cur; cur = nxt;
+    }
+    if (loop.length > 2) loops.push(loop);
   }
   return loops;
 }
@@ -425,24 +547,11 @@ function traceLoops(lab, k, w, h) {
 function area(L) {
   let a = 0;
   for (let i = 0, j = L.length - 1; i < L.length; j = i++)
-    a += (L[j][0] + 0.5) * (L[i][1] + 0.5) - (L[i][0] + 0.5) * (L[j][1] + 0.5);
+    a += (L[j][0] * L[i][1]) - (L[i][0] * L[j][1]);
   return a / 2;
 }
 
-// ---------- smoothing & simplification ----------
-function chaikin(P, it) {
-  for (let t = 0; t < it; t++) {
-    const Q = [], n = P.length;
-    for (let i = 0; i < n; i++) {
-      const a = P[i], b = P[(i + 1) % n];
-      Q.push([0.75 * a[0] + 0.25 * b[0], 0.75 * a[1] + 0.25 * b[1]]);
-      Q.push([0.25 * a[0] + 0.75 * b[0], 0.25 * a[1] + 0.75 * b[1]]);
-    }
-    P = Q;
-  }
-  return P;
-}
-
+// ---------- simplify (Douglas-Peucker, loop tertutup) ----------
 function simplify(P, eps) {
   const n = P.length;
   if (n < 4) return P;
@@ -476,23 +585,24 @@ function dp(pts, eps) {
   return pts.filter((_, i) => keep[i]);
 }
 
-// ---------- path output ----------
+// ---------- output path ----------
 const r2 = v => +v.toFixed(2);
+const fmt = p => r2(p[0]) + ' ' + r2(p[1]);
 const hex = c => '#' + c.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
 
-function polyPath(P, f) {
-  return 'M' + P.map(p => r2(p[0] * f) + ' ' + r2(p[1] * f)).join('L') + 'Z';
+function polyPath(P) {
+  return 'M' + P.map(fmt).join('L') + 'Z';
 }
 
-// kurva kuadratik via titik tengah: lebih halus dari polygon, ukuran file tetap kecil
-function bezPath(P, f) {
+// Catmull-Rom -> cubic bezier: kurva halus lewat semua titik
+function catmullPath(P) {
   const n = P.length;
-  const mid = i => { const a = P[i], b = P[(i + 1) % n]; return [(a[0] + b[0]) / 2 * f, (a[1] + b[1]) / 2 * f]; };
-  const m0 = mid(n - 1);
-  let d = 'M' + r2(m0[0]) + ' ' + r2(m0[1]);
+  let d = 'M' + fmt(P[0]);
   for (let i = 0; i < n; i++) {
-    const m = mid(i);
-    d += 'Q' + r2(P[i][0] * f) + ' ' + r2(P[i][1] * f) + ' ' + r2(m[0]) + ' ' + r2(m[1]);
+    const p0 = P[(i - 1 + n) % n], p1 = P[i], p2 = P[(i + 1) % n], p3 = P[(i + 2) % n];
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    d += 'C' + fmt(c1) + ' ' + fmt(c2) + ' ' + fmt(p2);
   }
   return d + 'Z';
 }
@@ -512,6 +622,23 @@ function bezPath(P, f) {
   if (document.readyState === "complete") setTimeout(hideLoader, 500);
   else window.addEventListener("load", function(){ setTimeout(hideLoader, 500); });
   setTimeout(hideLoader, 2600); /* pengaman: jangan pernah terjebak di loader */
+
+  /* ---- preset chips: sinkron ke select#pre (mesin baca select ini) ---- */
+  var preSel = $("pre"), chipsBox = $("prechips");
+  function syncChips(){
+    if (!preSel || !chipsBox) return;
+    var v = preSel.value;
+    var chips = chipsBox.querySelectorAll(".chip");
+    for (var i = 0; i < chips.length; i++)
+      chips[i].classList.toggle("on", chips[i].getAttribute("data-pre") === v);
+  }
+  if (chipsBox) chipsBox.addEventListener("click", function(e){
+    var chip = e.target.closest ? e.target.closest(".chip") : null;
+    if (!chip || !preSel) return;
+    preSel.value = chip.getAttribute("data-pre");
+    syncChips();
+  });
+  syncChips();
 
   /* ---- slider: isi track emas mengikuti nilai ---- */
   function paintRange(el){
